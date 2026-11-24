@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Menú Empleados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Botón de Regreso Flotante */
+        .btn-regresar {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: var(--dark);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .btn-regresar:hover {
+            background: #ffffff;
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* Círculos decorativos de fondo */
+        .circle-1, .circle-2 {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 1;
+        }
+        .circle-1 {
+            width: 450px;
+            height: 450px;
+            top: -150px;
+            left: -100px;
+        }
+        .circle-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            right: -50px;
+        }
+
+        /* Tarjeta principal con efecto Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 45px 60px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 119, 182, 0.2);
+            z-index: 10;
+            width: 100%;
+            max-width: 480px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container {
+            margin-bottom: 35px;
+        }
+
+        .logo-img {
+            max-width: 260px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+        }
+
+        /* Contenedor de las opciones del menú */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        /* Estilo de los botones tipo píldora */
+        .menu-btn {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 14px 25px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: var(--dark);
+            box-shadow: 0 5px 15px rgba(0, 119, 182, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .menu-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 22px rgba(0, 119, 182, 0.35);
+        }
+
+        /* Imágenes de iconos dentro de los botones */
+        .menu-icon {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            margin-right: 15px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .menu-text {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            flex-grow: 1;
+            text-align: center;
+            margin-right: 35px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botón de regreso minimalista -->
+    <a href="roles.html" class="btn-regresar">←</a>
+
+    <div class="circle-1"></div>
+    <div class="circle-2"></div>
+
+    <div class="glass-card">
+        <div class="logo-container">
+            <img src="IMG_1420.PNG" alt="Logo Hielo DIBEN" class="logo-img">
+        </div>
+        
+        <div class="menu-container">
+            <!-- Opción que va directo a la pantalla de contenedores -->
+            <a href="contenedores.html" class="menu-btn">
+                <img src="IMG_Hielo_Recu.png" alt="Icono Producción" class="menu-icon">
+                <span class="menu-text">Registrar Producción</span>
+            </a>
+
+            <!-- Opción Registro de Venta -->
+            <a href="ventas.html" class="menu-btn">
+                <img src="IMG_caja_Recu.png" alt="Icono Ventas" class="menu-icon">
+                <span class="menu-text">Registro de Venta</span>
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

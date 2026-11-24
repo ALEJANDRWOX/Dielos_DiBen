@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Selección de Roles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-deep: #14529a;
+            --blue-main: #0b6bb8;
+            --blue-mid: #1f8fd0;
+            --cyan: #38c6e6;
+            --cyan-soft: #a9e6f5;
+            --ice: #e6f8fd;
+            --text-dark: #0a3d7a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            overflow: hidden;
+            position: relative;
+            /* Mismo degradado del inicio: azul profundo -> cian */
+            background: linear-gradient(115deg, var(--blue-deep) 0%, var(--blue-mid) 38%, #5ad2ec 75%, var(--cyan-soft) 100%);
+        }
+
+        /* Círculos decorativos (eco del inicio) */
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .circle-1 {
+            width: 480px; height: 480px;
+            top: -170px; left: -130px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .circle-2 {
+            width: 360px; height: 360px;
+            bottom: -140px; left: 12%;
+            background: rgba(255, 255, 255, 0.07);
+        }
+        .circle-3 {
+            width: 420px; height: 420px;
+            top: -120px; right: 6%;
+            background: rgba(255, 255, 255, 0.18);
+        }
+        .circle-4 {
+            width: 340px; height: 340px;
+            bottom: -110px; right: -80px;
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        /* Botón regresar */
+        .btn-regresar {
+            position: fixed;
+            top: 26px; left: 26px;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            text-decoration: none;
+            font-size: 22px; font-weight: 700;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 18px rgba(2, 40, 100, 0.25);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        .btn-regresar:hover {
+            background: #ffffff;
+            color: var(--blue-main);
+            transform: translateX(-3px) scale(1.06);
+        }
+
+        /* Tarjeta de cristal */
+        .glass-card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 470px;
+            padding: 44px 44px 36px;
+            text-align: center;
+            border-radius: 32px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.62) 0%, rgba(205,242,252,0.45) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 25px 60px rgba(4, 50, 120, 0.35),
+                        inset 0 1px 0 rgba(255,255,255,0.8);
+            animation: aparecer 0.7s ease both;
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-img {
+            width: 100%;
+            max-width: 230px;
+            height: auto;
+            filter: drop-shadow(0 6px 10px rgba(10, 61, 122, 0.25));
+        }
+
+        .titulo {
+            margin-top: 22px;
+            font-size: 26px;
+            font-weight: 900;
+            color: var(--blue-main);
+            letter-spacing: 0.3px;
+        }
+
+        .subtitulo {
+            margin-top: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+
+        .divisor {
+            width: 54px; height: 4px;
+            margin: 20px auto 26px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--blue-main), var(--cyan));
+        }
+
+        /* Botones de rol */
+        .roles-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .role-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 22px 10px 10px;
+            border-radius: 60px;
+            text-decoration: none;
+            color: var(--text-dark);
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 0 6px 16px rgba(11, 107, 184, 0.14);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+            z-index: 0;
+        }
+
+        /* Relleno azul que aparece al pasar el cursor */
+        .role-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--blue-deep), var(--blue-mid));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: -1;
+        }
+
+        .role-btn:hover,
+        .role-btn:focus-visible {
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 12px 26px rgba(11, 107, 184, 0.4);
+            outline: none;
+        }
+        .role-btn:hover::before,
+        .role-btn:focus-visible::before { opacity: 1; }
+
+        .role-icon-wrap {
+            flex-shrink: 0;
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(145deg, #ffffff, var(--ice));
+            box-shadow: 0 3px 8px rgba(11, 107, 184, 0.2);
+        }
+
+        .role-icon {
+            width: 28px; height: 28px;
+            object-fit: contain;
+        }
+
+        .role-text {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .role-arrow {
+            font-size: 20px;
+            font-weight: 700;
+            opacity: 0.55;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .role-btn:hover .role-arrow {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        .footer {
+            margin-top: 26px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dark);
+            opacity: 0.65;
+        }
+
+        @media (max-width: 520px) {
+            .glass-card { padding: 34px 22px 28px; border-radius: 26px; }
+            .titulo { font-size: 22px; }
+            .role-text { font-size: 13px; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="inicio.html" class="btn-regresar" aria-label="Regresar al inicio">←</a>
+
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+    <div class="circle circle-4"></div>
+
+    <main class="glass-card">
+        <img src="IMG_1420.PNG" alt="Logo Hielo DIBEN" class="logo-img">
+
+        <h1 class="titulo">¿Cómo deseas ingresar?</h1>
+        <p class="subtitulo">Selecciona tu perfil para continuar</p>
+        <div class="divisor"></div>
+
+        <div class="roles-container">
+            <a href="login-empleado.html" class="role-btn">
+                <span class="role-icon-wrap">
+                    <img src="IMG_usuar_Recu.png" alt="" class="role-icon">
+                </span>
+                <span class="role-text">Empleados</span>
+                <span class="role-arrow">→</span>
+            </a>
+
+            <a href="choferes.html" class="role-btn">
+                <span class="role-icon-wrap">
+                    <img src="IMG_chofer_Recu.png" alt="" class="role-icon">
+                </span>
+                <span class="role-text">Choferes</span>
+                <span class="role-arrow">→</span>
+            </a>
+
+            <a href="login_admin.html" class="role-btn">
+                <span class="role-icon-wrap">
+                    <img src="IMG_admin_Recu.png" alt="" class="role-icon">
+                </span>
+                <span class="role-text">Administración</span>
+                <span class="role-arrow">→</span>
+            </a>
+        </div>
+
+        <p class="footer">© 2026 Erlands. Todos los derechos reservados.</p>
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Inicio de Sesión Empleados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-regresar {
+            position: fixed;
+            top: 25px; left: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: var(--dark); width: 45px; height: 45px;
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            text-decoration: none; font-size: 22px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5); z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .btn-regresar:hover { background: #ffffff; color: var(--primary); transform: scale(1.1); }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px; padding: 40px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 119, 182, 0.2);
+            width: 100%; max-width: 420px; z-index: 10;
+        }
+        .logo-img { max-width: 220px; margin-bottom: 20px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12)); }
+        h2 { color: var(--dark); font-size: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; margin-bottom: 15px; }
+        label { font-size: 14px; font-weight: 700; color: var(--dark); }
+        input, select {
+            padding: 12px 15px; font-size: 15px; font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 12px; outline: none; color: #333; width: 100%;
+        }
+        input:focus, select:focus { background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15); }
+        .btn-ingresar {
+            width: 100%; padding: 14px; background: var(--primary); border: none; color: white;
+            font-size: 16px; font-weight: 700; font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase; border-radius: 50px; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); transition: all 0.3s ease;
+        }
+        .btn-ingresar:hover { background: #ffffff; color: var(--primary); transform: translateY(-2px); }
+        .link-registro { display: block; margin-top: 18px; color: var(--dark); font-weight: 700; text-decoration: none; font-size: 14px; }
+        .link-registro:hover { text-decoration: underline; color: var(--primary); }
+    </style>
+</head>
+<body>
+    <a href="roles.html" class="btn-regresar">←</a>
+
+    <div class="glass-card">
+        <img src="IMG_1420.PNG" alt="Hielo DIBEN" class="logo-img">
+        <h2>Iniciar Sesión - Empleado</h2>
+        <form id="formLogin">
+            <div class="form-group">
+                <label>Número de Empleado:</label>
+                <input type="text" id="numeroEmpleado" required placeholder="Ej. EMP001" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label>Turno:</label>
+                <select id="turno" required>
+                    <option value="">Seleccione el turno</option>
+                    <option value="TM">Turno Matutino (TM)</option>
+                    <option value="TD">Turno Vespertino (TD)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-ingresar">Ingresar</button>
+        </form>
+        <a href="registro-empleado.html" class="link-registro">¿No te has registrado? Regístrate aquí</a>
+    </div>
+
+    <script>
+        document.getElementById('formLogin').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const numeroEmpleado = document.getElementById('numeroEmpleado').value.trim();
+            const turno = document.getElementById('turno').value;
+
+            try {
+                const res = await fetch('/api/empleados/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numeroEmpleado, turno })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem('empleadoActual', JSON.stringify(data.empleado));
+                    window.location.href = 'menu-empleado.html';
+                } else {
+                    const errorMsg = await res.text();
+                    alert(errorMsg);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Error de conexión con el servidor.");
+            }
+        });
+    </script>
+</body>
+</html>

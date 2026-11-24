@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Detalle de Contenedor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #2b2d42;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 30px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 1000;
+        }
+
+        .logo-img { 
+            height: 45px; 
+            width: auto; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .btn-regresar {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: var(--dark);
+            padding: 8px 16px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .btn-regresar:hover {
+            background: #ffffff;
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 80px auto 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark);
+            margin-bottom: 30px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+
+        .acciones-container {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-editar {
+            background-color: #ffb703;
+            color: #000;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-editar:hover {
+            background-color: #fb8500;
+            color: white;
+        }
+
+        .btn-eliminar {
+            background-color: #d90429;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-eliminar:hover {
+            background-color: #8d0801;
+        }
+
+        /* Estilos para los Modales Estéticos (Glassmorphism) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 35px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 20px 40px rgba(0, 119, 182, 0.3);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-logo-badge {
+            width: 60px;
+            height: 60px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .modal-logo-badge img {
+            width: 40px;
+            height: auto;
+        }
+
+        .modal-card h3 {
+            color: var(--dark);
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-title-line {
+            width: 40px;
+            height: 3px;
+            background: var(--primary);
+            margin: 0 auto 20px auto;
+            border-radius: 2px;
+        }
+
+        .modal-card p {
+            color: #495057;
+            font-size: 14px;
+            margin-bottom: 25px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .modal-form-group label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-form-group input {
+            padding: 12px 15px;
+            font-size: 15px;
+            font-family: 'Montserrat', sans-serif;
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 12px;
+            outline: none;
+            color: #333;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .modal-form-group input:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn-modal-cancelar {
+            flex: 1;
+            padding: 12px;
+            background: #e9ecef;
+            border: none;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal-cancelar:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .btn-modal-guardar {
+            flex: 1;
+            padding: 12px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal-guardar:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-modal-eliminar {
+            flex: 1;
+            padding: 12px;
+            background: #e63946;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal-eliminar:hover {
+            background: #d90429;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="logo-img">
+        <a href="admin-contenedores.html" class="btn-regresar">← Volver a Contenedores</a>
+    </div>
+
+    <div class="container">
+        <h1 id="titulo-contenedor">Registros del Contenedor</h1>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Empleado</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Hielos Extraídos</th>
+                            <th>Mermas</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaDetalleProduccion">
+                        <!-- Dinámico -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Edición Estético (Basado en la Muestra 1) -->
+    <div id="modalEditar" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-logo-badge">
+                <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN">
+            </div>
+            <h3>Editar Producción</h3>
+            <div class="modal-title-line"></div>
+
+            <div class="modal-form-group">
+                <label>Fecha</label>
+                <input type="date" id="edit-fecha" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Hora</label>
+                <input type="time" id="edit-hora" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Hielos Extraídos</label>
+                <input type="number" id="edit-hielos" min="0" required>
+            </div>
+            <div class="modal-form-group">
+                <label>Mermas</label>
+                <input type="number" id="edit-mermas" min="0" required>
+            </div>
+
+            <div class="modal-botones">
+                <button type="button" class="btn-modal-cancelar" onclick="cerrarModalEditar()">Cancelar</button>
+                <button type="button" class="btn-modal-guardar" onclick="guardarEdicionProduccion()">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación Estético (Basado en la Muestra 3) -->
+    <div id="modalEliminar" class="modal-overlay">
+        <div class="modal-card">
+            <div style="font-size: 50px; margin-bottom: 10px;">⚠️</div>
+            <h3>¿Estás Seguro?</h3>
+            <div class="modal-title-line" style="background: #e63946;"></div>
+            <p>Esta acción no se puede deshacer.<br>El registro se borrará permanentemente de la base de datos.</p>
+
+            <div class="modal-botones">
+                <button type="button" class="btn-modal-cancelar" onclick="cerrarModalEliminar()">Cancelar</button>
+                <button type="button" class="btn-modal-eliminar" onclick="ejecutarEliminarProduccion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const parametrosURL = new URLSearchParams(window.location.search);
+        const contenedorActual = parametrosURL.get('contenedor');
+
+        if (contenedorActual) {
+            document.getElementById('titulo-contenedor').innerText = `Registros del Contenedor: ${contenedorActual}`;
+        } else {
+            alert("No se especificó ningún contenedor.");
+            window.location.href = 'admin-contenedores.html';
+        }
+
+        async function cargarDetalleContenedor() {
+            try {
+                const resProd = await fetch('/api/admin/produccion');
+                const produccion = await resProd.json();
+                const tbodyProd = document.getElementById('tablaDetalleProduccion');
+                tbodyProd.innerHTML = '';
+
+                // Filtrar solo los registros que coincidan con el contenedor seleccionado
+                const filtrados = produccion.filter(p => p.contenedor === contenedorActual);
+
+                if (filtrados.length === 0) {
+                    tbodyProd.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #666; padding: 20px;">No hay registros para este contenedor.</td></tr>`;
+                    return;
+                }
+
+                filtrados.forEach(p => {
+                    const hielos = p.hielos_extraidos !== undefined ? p.hielos_extraidos : 0;
+                    tbodyProd.innerHTML += `
+                        <tr>
+                            <td>${p.id}</td>
+                            <td>${p.empleado_nombre} (${p.empleado_num})</td>
+                            <td>${soloFecha(p.fecha)}</td>
+                            <td>${String(p.hora).slice(0, 5)}</td>
+                            <td>${hielos}</td>
+                            <td>${p.mermas}</td>
+                            <td>
+                                <div class="acciones-container">
+                                    <button class="btn-editar" onclick="editarProduccion(${p.id}, '${soloFecha(p.fecha)}', '${String(p.hora).slice(0, 5)}', ${hielos}, ${p.mermas})">Editar</button>
+                                    <button class="btn-eliminar" onclick="eliminarProduccion(${p.id})">Eliminar</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error al cargar el detalle del contenedor:', error);
+            }
+        }
+
+        let idProduccionEditar = null;
+        let idProduccionEliminar = null;
+
+        const soloFecha = (f) => String(f).slice(0, 10);
+
+        function editarProduccion(id, fechaActual, horaActual, hielosExtraidosActual, mermasActual) {
+            idProduccionEditar = id;
+            document.getElementById('edit-fecha').value = fechaActual;
+            document.getElementById('edit-hora').value = horaActual;
+            document.getElementById('edit-hielos').value = hielosExtraidosActual;
+            document.getElementById('edit-mermas').value = mermasActual;
+            document.getElementById('modalEditar').style.display = 'flex';
+        }
+
+        function cerrarModalEditar() {
+            document.getElementById('modalEditar').style.display = 'none';
+            idProduccionEditar = null;
+        }
+
+        async function guardarEdicionProduccion() {
+            if (!idProduccionEditar) return;
+
+            const fecha = document.getElementById('edit-fecha').value;
+            const hora = document.getElementById('edit-hora').value;
+            const hielosExtraidos = parseInt(document.getElementById('edit-hielos').value) || 0;
+            const mermas = parseInt(document.getElementById('edit-mermas').value) || 0;
+
+            if (mermas > hielosExtraidos) {
+                alert("Error: La cantidad de mermas no puede ser mayor a los hielos extraídos.");
+                return;
+            }
+
+            const datosActualizados = { fecha, hora, hielosExtraidos, mermas };
+
+            try {
+                const res = await fetch(`/api/admin/produccion/${idProduccionEditar}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosActualizados)
+                });
+
+                if (res.ok) {
+                    cerrarModalEditar();
+                    cargarDetalleContenedor();
+                } else {
+                    alert('Error al actualizar producción.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión con el servidor.');
+            }
+        }
+
+        function eliminarProduccion(id) {
+            idProduccionEliminar = id;
+            document.getElementById('modalEliminar').style.display = 'flex';
+        }
+
+        function cerrarModalEliminar() {
+            document.getElementById('modalEliminar').style.display = 'none';
+            idProduccionEliminar = null;
+        }
+
+        async function ejecutarEliminarProduccion() {
+            if (!idProduccionEliminar) return;
+
+            try {
+                const res = await fetch(`/api/admin/produccion/${idProduccionEliminar}`, {
+                    method: 'DELETE'
+                });
+
+                if (res.ok) {
+                    cerrarModalEliminar();
+                    cargarDetalleContenedor();
+                } else {
+                    alert('Error al eliminar la producción.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error de conexión con el servidor.');
+            }
+        }
+
+        window.onload = cargarDetalleContenedor;
+    </script>
+</body>
+</html>

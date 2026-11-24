@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Configuración WhatsApp y Métricas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --blue-deep: #0d4f9a;
+            --blue: #1a7fc4;
+            --cyan: #4cc9e8;
+            --ice: #e8f8fd;
+            --ink: #0b3d7a;
+            --text: #1f3550;
+            --muted: #5b7690;
+            --danger: #d62839;
+            --success: #2d6a4f;
+            --glass: rgba(255, 255, 255, 0.45);
+            --glass-strong: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.65);
+            --shadow: 0 20px 50px rgba(8, 70, 130, 0.25);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1565b0 0%, #2a9ad8 45%, #8fe0f2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        .header {
+            position: sticky; top: 0; z-index: 1000;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 20px; padding: 14px 32px;
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .logo-img { height: 56px; width: auto; border-radius: 14px; }
+        .btn-nav {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 11px 22px; border-radius: 50px;
+            font-size: 12.5px; font-weight: 800; text-transform: uppercase;
+            text-decoration: none; color: var(--blue-deep);
+            background: rgba(255, 255, 255, 0.85);
+            transition: all 0.3s ease;
+        }
+        .btn-nav:hover { background: var(--blue-deep); color: #fff; }
+        .container {
+            max-width: 1300px; margin: 0 auto; padding: 36px 24px;
+            display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px;
+        }
+        @media (max-width: 1024px) { .container { grid-template-columns: 1fr; } }
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(22px);
+            border: 1px solid var(--glass-border);
+            border-radius: 36px; padding: 30px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+        .card h2 {
+            color: var(--ink); font-size: 18px; font-weight: 800;
+            text-transform: uppercase; margin-bottom: 15px;
+        }
+        .qr-container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: #fff; border-radius: 20px; padding: 20px; min-height: 280px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1); text-align: center;
+        }
+        .btn-accion {
+            width: 100%; padding: 14px; border-radius: 50px; border: none;
+            font-weight: 800; text-transform: uppercase; cursor: pointer;
+            background: linear-gradient(90deg, var(--blue-deep), var(--blue));
+            color: #fff; margin-top: 15px; box-shadow: 0 6px 16px rgba(13,79,154,0.3);
+            transition: transform 0.2s;
+        }
+        .btn-accion:hover { transform: translateY(-2px); }
+        .btn-accion:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; font-size: 13px; }
+        th { background: var(--blue-deep); color: #fff; border-radius: 8px 8px 0 0; }
+        td { background: var(--glass-strong); border-bottom: 1px solid rgba(255,255,255,0.4); }
+        .chart-box { margin-top: 20px; background: #fff; padding: 20px; border-radius: 20px; }
+
+        .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn-mini {
+            border: none; cursor: pointer; padding: 8px 14px; border-radius: 50px;
+            font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-mini:hover { transform: translateY(-2px); }
+        .btn-mini:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-editar {
+            background: linear-gradient(90deg, var(--blue-deep), var(--blue));
+            color: #fff; box-shadow: 0 4px 12px rgba(13,79,154,0.3);
+        }
+        .btn-eliminar {
+            background: rgba(214, 40, 57, 0.12); color: var(--danger);
+            border: 1px solid rgba(214, 40, 57, 0.35);
+        }
+        .btn-eliminar:hover { background: var(--danger); color: #fff; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            background: rgba(10, 50, 100, 0.35);
+            backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.activo { display: flex; }
+        .modal {
+            width: 100%; max-width: 420px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(205,232,246,0.92));
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 30px; padding: 30px 32px 28px;
+            box-shadow: 0 25px 60px rgba(8, 70, 130, 0.35);
+            animation: aparecer 0.25s ease;
+        }
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .modal-logo {
+            display: block; width: 76px; height: 76px;
+            margin: 0 auto 14px; border-radius: 18px;
+            box-shadow: 0 6px 16px rgba(13,79,154,0.3);
+        }
+        .modal h3 {
+            text-align: center; color: var(--ink);
+            font-size: 19px; font-weight: 800; letter-spacing: 3px;
+            text-transform: uppercase; margin-bottom: 8px;
+        }
+        .modal-linea {
+            width: 60px; height: 3px; margin: 0 auto 24px; border-radius: 3px;
+            background: linear-gradient(90deg, var(--blue-deep), var(--cyan));
+        }
+        .campo { margin-bottom: 16px; }
+        .campo label {
+            display: block; margin-bottom: 8px;
+            color: var(--ink); font-size: 11px; font-weight: 800;
+            letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .campo input {
+            width: 100%; padding: 14px 18px;
+            border: none; border-radius: 16px; background: #fff;
+            font-family: 'Montserrat', sans-serif; font-size: 15px; color: var(--text);
+            box-shadow: 0 2px 8px rgba(8,70,130,0.08);
+            outline: none; transition: box-shadow 0.2s;
+        }
+        .campo input:focus { box-shadow: 0 0 0 3px rgba(76,201,232,0.6); }
+        .modal-acciones { display: flex; gap: 14px; margin-top: 26px; }
+        .btn-modal {
+            flex: 1; padding: 15px; border-radius: 50px; border: none; cursor: pointer;
+            font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1px; transition: transform 0.2s;
+        }
+        .btn-modal:hover { transform: translateY(-2px); }
+        .btn-modal:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-cancelar {
+            background: rgba(255,255,255,0.8); color: var(--blue-deep);
+            box-shadow: 0 4px 12px rgba(8,70,130,0.12);
+        }
+        .btn-guardar {
+            background: linear-gradient(90deg, var(--blue-deep), var(--blue));
+            color: #fff; box-shadow: 0 8px 20px rgba(13,79,154,0.35);
+        }
+        .btn-peligro {
+            background: linear-gradient(90deg, #c81d2e, #e63946);
+            color: #fff; box-shadow: 0 8px 20px rgba(214,40,57,0.35);
+        }
+        .error-form { color: var(--danger); font-size: 12px; font-weight: 600; text-align: center; min-height: 16px; margin-top: 12px; }
+
+        .modal-dialogo { text-align: center; }
+        .dialogo-icono { display: flex; justify-content: center; margin-bottom: 14px; }
+        .dialogo-icono svg { width: 64px; height: 64px; }
+        .modal-dialogo h3 { margin-bottom: 4px; }
+        .modal-dialogo .modal-linea { margin-bottom: 18px; }
+        .dialogo-texto {
+            color: var(--muted); font-size: 14px; line-height: 1.6;
+            white-space: pre-line;
+        }
+        .modal-dialogo .modal-acciones { margin-top: 26px; }
+
+        .fila-inferior {
+            max-width: 1300px; margin: 0 auto; padding: 0 24px 36px;
+            display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+        }
+        @media (max-width: 1024px) { .fila-inferior { grid-template-columns: 1fr; } }
+
+        .tarjeta-grafica {
+    background: linear-gradient(160deg, rgba(255,255,255,0.92), rgba(205,232,246,0.92));
+    border: 1px solid rgba(255,255,255,0.8);
+    border-radius: 30px; padding: 30px 32px 28px;
+    box-shadow: 0 25px 60px rgba(8, 70, 130, 0.35);
+    margin-bottom: 24px;
+}
+.tarjeta-grafica-titulo { text-align: center; margin-bottom: 18px; }
+.tarjeta-grafica-titulo h2 {
+    color: var(--ink); font-size: 18px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;
+}
+.linea-acento {
+    width: 60px; height: 3px; margin: 0 auto; border-radius: 3px;
+    background: linear-gradient(90deg, var(--blue-deep), var(--cyan));
+}
+.chart-box-glass {
+    background: #fff; border-radius: 20px; padding: 20px;
+    box-shadow: 0 8px 20px rgba(8, 70, 130, 0.12);
+}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="logo-img">
+
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="position: relative;">
+                <button id="boton_campana_pendientes" onclick="abrir_modal_pendientes()" style="background: rgba(255,255,255,0.8); border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    🔔
+                </button>
+                <span id="badge_pendientes" style="position: absolute; top: -4px; right: -4px; background: var(--muted); color: #fff; border-radius: 50%; min-width: 20px; height: 20px; padding: 0 5px; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 800;">0</span>
+            </div>
+            <a href="admin-dashboard.html" class="btn-nav">← Volver al Panel</a>
+        </div>
+    </div>
+
+<div class="container">
+    <div>
+        <!-- Vincular -->
+        <div class="card">
+            <h2>Vincular Dispositivo Principal</h2>
+            <p style="font-size: 13px; color: var(--muted); margin-bottom: 20px;">
+                Conecta el teléfono emisor y receptor principal escaneando el código QR.
+            </p>
+            <div class="qr-container" id="caja_qr_bot">
+                <span style="color: var(--muted); font-weight: 600;">Haz clic en el botón para iniciar y mostrar el QR</span>
+            </div>
+            <button id="boton_vincular_bot" class="btn-accion" onclick="iniciar_vinculacion_bot()">Vincular Dispositivo Principal</button>
+            <button id="boton_reiniciar_bot" class="btn-mini btn-eliminar" style="margin-top: 12px; width: 100%; padding: 11px;" onclick="reiniciar_vinculacion_bot()">Reiniciar vinculación</button>
+        </div>
+
+        <!-- Configuración de horario -->
+        <div class="card">
+            <h2>Configuración de Horario del Bot</h2>
+            <div style="display: flex; gap: 12px; margin-bottom: 15px;">
+                <div class="campo" style="flex:1;">
+                    <label for="hora_apertura_config">Hora Apertura</label>
+                    <input type="time" id="hora_apertura_config" value="07:00">
+                </div>
+                <div class="campo" style="flex:1;">
+                    <label for="hora_cierre_config">Hora Cierre</label>
+                    <input type="time" id="hora_cierre_config" value="18:00">
+                </div>
+            </div>
+            <div class="campo">
+                <label for="mensaje_fuera_horario_config">Mensaje Fuera de Horario</label>
+                <input type="text" id="mensaje_fuera_horario_config" value="🕒 Estamos fuera de horario. Tu pedido quedará programado.">
+            </div>
+            <button class="btn-accion" onclick="guardar_config_horario()">Guardar Configuración de Horario</button>
+        </div>
+    </div>
+
+    <div>
+        <!-- Repartidores -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2>Gestión de Repartidores</h2>
+                <button class="btn-mini btn-editar" onclick="abrir_modal_agregar_repartidores()" style="padding: 10px 16px;">+ Agregar Repartidor</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Prueba</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_repartidores">
+                        <tr><td colspan="4" style="text-align: center; color: var(--muted);">Cargando repartidores...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fila inferior: resumen semanal y gráfica lado a lado -->
+<div class="fila-inferior">
+    <div class="card">
+        <h2>Resumen Semanal (Lunes a Viernes) Sujeto a Cambios</h2>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Total Pedidos</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla_resumen_semanal">
+                    <tr><td colspan="3" style="text-align: center; color: var(--muted);">Cargando resumen de la semana...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tarjeta-grafica">
+    <div class="tarjeta-grafica-titulo">
+        <h2>Pedidos del Mes por Semana</h2>
+        <div class="linea-acento"></div>
+    </div>
+    <div class="chart-box-glass">
+        <canvas id="grafica_mes_actual"></canvas>
+    </div>
+</div>
+</div>
+
+    <!-- MODAL: EDITAR RESUMEN SEMANAL (solo Total Pedidos y Total Vendido) -->
+    <div class="modal-overlay" id="modal_editar_semanal">
+        <div class="modal">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3>Editar Resumen Semanal</h3>
+            <div class="modal-linea"></div>
+
+            <form id="form_editar_semanal">
+                <input type="hidden" id="id_resumen_semanal">
+
+                <div class="campo">
+                    <label for="fecha_resumen_semanal">Fecha</label>
+                    <input type="date" id="fecha_resumen_semanal" required readonly style="background: rgba(0,0,0,0.05); cursor: not-allowed;">
+                </div>
+                <div class="campo">
+                    <label for="pedidos_resumen_semanal">Total Pedidos</label>
+                    <input type="number" id="pedidos_resumen_semanal" min="0" step="1" required placeholder="0">
+                </div>
+                <div class="error-form" id="error_resumen_semanal"></div>
+
+                <div class="modal-acciones">
+                    <button type="button" class="btn-modal btn-cancelar" onclick="cerrar_modal_editar_semanal()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-guardar" id="boton_guardar_semanal">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AGREGAR / EDITAR REPARTIDORES -->
+    <div class="modal-overlay" id="modal_repartidores">
+        <div class="modal">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3 id="titulo_repartidores">Agregar Repartidor</h3>
+            <div class="modal-linea"></div>
+            <form id="form_repartidores">
+                <input type="hidden" id="id_repartidores">
+                <div class="campo">
+                    <label for="nombre_repartidores">Nombre</label>
+                    <input type="text" id="nombre_repartidores" required>
+                </div>
+                <div class="campo">
+                    <label for="telefono_repartidores">Teléfono (con lada 52)</label>
+                    <input type="text" id="telefono_repartidores" placeholder="5217221234567" required>
+                </div>
+                <div class="modal-acciones">
+                    <button type="button" class="btn-modal btn-cancelar" onclick="cerrar_modal_repartidores()">Cancelar</button>
+                    <button type="submit" class="btn-modal btn-guardar">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PEDIDOS PENDIENTES -->
+    <div class="modal-overlay" id="modal_pendientes">
+        <div class="modal" style="max-width: 560px;">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3>Pedidos Pendientes</h3>
+            <div class="modal-linea"></div>
+            <div id="lista_pendientes" style="max-height: 380px; overflow-y: auto;"></div>
+            <div class="modal-acciones">
+                <button type="button" class="btn-modal btn-cancelar" onclick="cerrar_modal_pendientes()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: DIÁLOGO GENERAL (confirmaciones y avisos) -->
+    <div class="modal-overlay" id="modal_dialogo">
+        <div class="modal modal-dialogo">
+            <div class="dialogo-icono" id="icono_dialogo"></div>
+            <h3 id="titulo_dialogo">Aviso</h3>
+            <div class="modal-linea"></div>
+            <div class="dialogo-texto" id="texto_dialogo"></div>
+            <div class="modal-acciones" id="botones_dialogo"></div>
+        </div>
+    </div>
+
+<script>
+    let intervalo_estado_bot = null;
+    let lista_repartidores_cache = [];
+    const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
+
+    // ===== Utilidades generales =====
+    function escapar_html_util(valor) {
+        return String(valor ?? '').replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function formatear_fecha_util(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const dia = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + dia;
+    }
+
+    function obtener_fechas_semana_util() {
+        const hoy = new Date();
+        const desfase_lunes = (hoy.getDay() + 6) % 7;
+        const lunes = new Date(hoy);
+        lunes.setDate(hoy.getDate() - desfase_lunes);
+
+        return DIAS_SEMANA.map((dia, i) => {
+            const f = new Date(lunes);
+            f.setDate(lunes.getDate() + i);
+            return { dia: dia, fecha: formatear_fecha_util(f) };
+        });
+    }
+
+    // ===== Diálogos e iconos =====
+    const ICONOS = {
+        peligro: '<svg viewBox="0 0 64 64">' +
+                 '<path d="M32 6 L60 56 H4 Z" fill="#ffd500" stroke="#111" stroke-width="4" stroke-linejoin="round"/>' +
+                 '<rect x="29" y="22" width="6" height="20" rx="3" fill="#111"/>' +
+                 '<circle cx="32" cy="49" r="3.5" fill="#111"/></svg>',
+        error: '<svg viewBox="0 0 64 64">' +
+               '<circle cx="32" cy="32" r="28" fill="#d62839" stroke="#111" stroke-width="3"/>' +
+               '<path d="M21 21 L43 43 M43 21 L21 43" stroke="#fff" stroke-width="6" stroke-linecap="round"/></svg>',
+        aviso: '<svg viewBox="0 0 64 64">' +
+               '<circle cx="32" cy="32" r="28" fill="#1a7fc4" stroke="#0b3d7a" stroke-width="3"/>' +
+               '<path d="M32 26 V46" stroke="#fff" stroke-width="6" stroke-linecap="round"/>' +
+               '<circle cx="32" cy="18" r="3.5" fill="#fff"/></svg>'
+    };
+
+    function mostrar_dialogo({ tipo = 'aviso', titulo, texto, aceptar = 'Entendido', cancelar = null }) {
+        return new Promise(resolve => {
+            const overlay = document.getElementById('modal_dialogo');
+            const contenedor = document.getElementById('botones_dialogo');
+
+            document.getElementById('icono_dialogo').innerHTML = ICONOS[tipo] || ICONOS.aviso;
+            document.getElementById('titulo_dialogo').innerText = titulo;
+            document.getElementById('texto_dialogo').innerText = texto;
+            contenedor.innerHTML = '';
+
+            const cerrar = (valor) => {
+                overlay.classList.remove('activo');
+                resolve(valor);
+            };
+
+            if (cancelar) {
+                const boton_cancelar = document.createElement('button');
+                boton_cancelar.className = 'btn-modal btn-cancelar';
+                boton_cancelar.innerText = cancelar;
+                boton_cancelar.onclick = () => cerrar(false);
+                contenedor.appendChild(boton_cancelar);
+            }
+
+            const boton_aceptar = document.createElement('button');
+            boton_aceptar.className = 'btn-modal ' + (tipo === 'peligro' ? 'btn-peligro' : 'btn-guardar');
+            boton_aceptar.innerText = aceptar;
+            boton_aceptar.onclick = () => cerrar(true);
+            contenedor.appendChild(boton_aceptar);
+
+            overlay.classList.add('activo');
+        });
+    }
+
+    // ===== Módulo: vinculación WhatsApp (bot) =====
+    let bot_vinculado_en_pantalla = false;
+    let inicio_espera_qr_bot = 0;
+    const SEGUNDOS_AVISO_SIN_QR = 60;
+
+    function mostrar_qr_bot(qr) {
+        const caja = document.getElementById('caja_qr_bot');
+        const boton = document.getElementById('boton_vincular_bot');
+        caja.innerHTML = '<img src="' + qr + '" alt="QR WhatsApp" style="width:200px; height:200px;"><p style="font-size:12px; margin-top:10px; color:var(--muted);">Escanea con WhatsApp</p>';
+        boton.style.display = 'block';
+        boton.innerText = 'Esperando vinculación...';
+        boton.disabled = true;
+    }
+
+    function mostrar_error_bot(texto) {
+        const caja = document.getElementById('caja_qr_bot');
+        const boton = document.getElementById('boton_vincular_bot');
+        caja.innerHTML = '<span style="color: var(--danger); font-weight: 600;">' + escapar_html_util(texto) + '</span>';
+        boton.style.display = 'block';
+        boton.disabled = false;
+        boton.innerText = 'Vincular Dispositivo Principal';
+    }
+
+    function activar_vigilancia_bot() {
+        if (!intervalo_estado_bot) intervalo_estado_bot = setInterval(verificar_estado_conexion_bot, 3000);
+    }
+
+    async function verificar_estado_inicial_bot() {
+        try {
+            const res = await fetch('/api/bot/estado');
+            const data = await res.json();
+            if (data.conectado) marcar_vinculado_exitoso_bot();
+        } catch (e) {
+            console.error('Error al verificar estado inicial:', e);
+        }
+    }
+
+    async function iniciar_vinculacion_bot(reiniciar) {
+        const boton = document.getElementById('boton_vincular_bot');
+        const caja = document.getElementById('caja_qr_bot');
+        boton.style.display = 'block';
+        boton.disabled = true;
+        boton.innerText = reiniciar ? 'Reiniciando...' : 'Iniciando bot y generando QR...';
+        caja.innerHTML = '<span style="color: var(--blue-deep); font-weight: 700;">' +
+            (reiniciar ? 'Reiniciando WhatsApp, puede tardar unos segundos...' : 'Generando código QR, por favor espere...') +
+            '</span>';
+        bot_vinculado_en_pantalla = false;
+        inicio_espera_qr_bot = Date.now();
+
+        try {
+            const url = reiniciar ? '/api/bot/iniciar?reiniciar=1&borrarSesion=1' : '/api/bot/iniciar';
+            const res = await fetch(url, { method: 'POST' });
+            if (res.status === 401) {
+                window.location.href = 'login_admin.html';
+                return;
+            }
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            if (data.conectado) {
+                marcar_vinculado_exitoso_bot();
+                return;
+            }
+            if (data.error) {
+                mostrar_error_bot(data.error);
+                return;
+            }
+            if (data.qr) {
+                mostrar_qr_bot(data.qr);
+            } else {
+                caja.innerHTML = '<span style="color: var(--blue-deep); font-weight: 700;">Preparando código QR, espera...</span>';
+                boton.innerText = 'Esperando vinculación...';
+            }
+            activar_vigilancia_bot();
+        } catch (e) {
+            console.error(e);
+            mostrar_error_bot('Error de conexión con el servidor.');
+        }
+    }
+
+    async function reiniciar_vinculacion_bot() {
+        const confirmado = await mostrar_dialogo({
+            tipo: 'peligro',
+            titulo: '¿Reiniciar vinculación?',
+            texto: 'Se cerrará la sesión de WhatsApp de este bot y se borrará la sesión guardada.\nTendrás que escanear un código QR nuevo.',
+            aceptar: 'Reiniciar',
+            cancelar: 'Cancelar'
+        });
+        if (!confirmado) return;
+        if (intervalo_estado_bot) { clearInterval(intervalo_estado_bot); intervalo_estado_bot = null; }
+        iniciar_vinculacion_bot(true);
+    }
+
+    async function verificar_estado_conexion_bot() {
+        try {
+            const res = await fetch('/api/bot/estado');
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.conectado) {
+                if (intervalo_estado_bot) { clearInterval(intervalo_estado_bot); intervalo_estado_bot = null; }
+                if (!bot_vinculado_en_pantalla) marcar_vinculado_exitoso_bot();
+                return;
+            }
+
+            // La página decía "vinculado" pero el servidor perdió la conexión
+            if (bot_vinculado_en_pantalla) {
+                marcar_desvinculado_bot();
+                if (data.error) mostrar_error_bot(data.error);
+                return;
+            }
+
+            if (data.qr) {
+                inicio_espera_qr_bot = 0;
+                mostrar_qr_bot(data.qr);
+            } else if (data.error) {
+                if (intervalo_estado_bot) { clearInterval(intervalo_estado_bot); intervalo_estado_bot = null; }
+                inicio_espera_qr_bot = 0;
+                mostrar_error_bot(data.error);
+            } else if (inicio_espera_qr_bot && (Date.now() - inicio_espera_qr_bot) > SEGUNDOS_AVISO_SIN_QR * 1000) {
+                inicio_espera_qr_bot = 0;
+                mostrar_error_bot('No apareció el código QR. Pulsa "Reiniciar vinculación" para intentarlo de nuevo.');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function marcar_vinculado_exitoso_bot() {
+        const caja = document.getElementById('caja_qr_bot');
+        const boton = document.getElementById('boton_vincular_bot');
+        bot_vinculado_en_pantalla = true;
+        inicio_espera_qr_bot = 0;
+        caja.innerHTML =
+            '<div style="color: var(--success); font-weight: 800; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px;">' +
+            '<span style="font-size: 40px;">✅</span>' +
+            '¡Dispositivo Vinculado Exitosamente!' +
+            '<p style="font-size: 12px; color: var(--muted); font-weight: 500;">El bot está activo y listo para atender mensajes.</p>' +
+            '</div>';
+        boton.style.display = 'none';
+    }
+
+    function marcar_desvinculado_bot() {
+        const caja = document.getElementById('caja_qr_bot');
+        const boton = document.getElementById('boton_vincular_bot');
+        bot_vinculado_en_pantalla = false;
+        caja.innerHTML = '<span style="color: var(--muted); font-weight: 600;">Bot desvinculado. Pulsa el botón para generar un nuevo código QR.</span>';
+        boton.style.display = 'block';
+        boton.disabled = false;
+        boton.innerText = 'Vincular Dispositivo Principal';
+    }
+
+    // ===== Módulo: resumen semanal =====
+    async function cargar_resumen_semanal() {
+    const cuerpo = document.getElementById('tabla_resumen_semanal');
+    const semana = obtener_fechas_semana_util();
+    let datos = [];
+
+    try {
+        const res = await fetch('/api/metricas/semana');
+        if (res.ok) datos = await res.json();
+    } catch (e) {
+        console.error('Error al cargar resumen semanal:', e);
+    }
+
+    const normalizar = (texto) => String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    cuerpo.innerHTML = '';
+    semana.forEach(({ dia, fecha }) => {
+        const encontrado = datos.find(d => {
+            const dia_servidor = normalizar(d.dia);
+            const dia_objetivo = normalizar(dia);
+            const fecha_servidor = String(d.fecha || '').slice(0, 10);
+            return (dia_servidor && dia_servidor === dia_objetivo) || (fecha_servidor && fecha_servidor === fecha);
+        }) || { pedidos: 0 };
+
+        cuerpo.innerHTML +=
+            '<tr>' +
+            '<td><b>' + dia + '</b>' + (encontrado.ajustado ? ' <span title="Cifras ajustadas manualmente">✎</span>' : '') + '</td>' +
+            '<td>' + (encontrado.pedidos || 0) + ' pedidos</td>' +
+            '<td><div class="acciones">' +
+            '<button class="btn-mini btn-editar" onclick="abrir_modal_editar_semanal(\'' + fecha + '\')">Editar</button>' +
+            '<button class="btn-mini btn-eliminar" onclick="eliminar_dia_semanal(\'' + fecha + '\', \'' + dia + '\')">Eliminar</button>' +
+            '</div></td>' +
+            '</tr>';
+    });
+}
+
+    async function abrir_modal_editar_semanal(fecha) {
+    let registro = null;
+    try {
+        const res = await fetch('/api/metricas/semana?fecha=' + fecha);
+        if (res.status === 401) { window.location.href = 'login_admin.html'; return; }
+        if (res.ok) {
+            const data = await res.json();
+            registro = Array.isArray(data)
+                ? (data.find(d => String(d.fecha).slice(0, 10) === fecha) || null)
+                : data;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
+    document.getElementById('id_resumen_semanal').value = (registro && registro.id) ? registro.id : '';
+    document.getElementById('fecha_resumen_semanal').value = fecha;
+    document.getElementById('pedidos_resumen_semanal').value = registro ? (registro.pedidos ?? 0) : 0;
+    document.getElementById('error_resumen_semanal').innerText = '';
+    document.getElementById('modal_editar_semanal').classList.add('activo');
+}
+
+    function cerrar_modal_editar_semanal() {
+        document.getElementById('modal_editar_semanal').classList.remove('activo');
+    }
+
+    async function guardar_resumen_semanal(evento) {
+    evento.preventDefault();
+    const boton = document.getElementById('boton_guardar_semanal');
+    const caja_error = document.getElementById('error_resumen_semanal');
+
+    const id = document.getElementById('id_resumen_semanal').value;
+    const datos = {
+        fecha: document.getElementById('fecha_resumen_semanal').value,
+        pedidos: parseInt(document.getElementById('pedidos_resumen_semanal').value, 10)
+    };
+
+    if (datos.pedidos < 0) {
+        caja_error.innerText = 'Los pedidos no pueden ser negativos.';
+        return;
+    }
+
+    boton.disabled = true;
+    boton.innerText = 'Guardando...';
+
+    try {
+        const url = id ? '/api/metricas/semana/' + id : '/api/metricas/semana';
+        const metodo = id ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+            method: metodo,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        });
+        if (res.status === 401) { window.location.href = 'login_admin.html'; return; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        cerrar_modal_editar_semanal();
+        cargar_resumen_semanal();
+        cargar_grafica_mes();
+    } catch (err) {
+        console.error(err);
+        caja_error.innerText = 'No se pudo guardar. Intenta de nuevo.';
+    } finally {
+        boton.disabled = false;
+        boton.innerText = 'Guardar';
+    }
+}
+
+    async function eliminar_dia_semanal(fecha, dia) {
+        const confirmado = await mostrar_dialogo({
+            tipo: 'peligro',
+            titulo: '¿Estás seguro?',
+            texto: 'Esta acción no se puede deshacer.\nEl registro se borrará permanentemente de la base de datos.',
+            aceptar: 'Eliminar',
+            cancelar: 'Cancelar'
+        });
+        if (!confirmado) return;
+
+        try {
+            const res = await fetch('/api/metricas/semana/dia/' + fecha, { method: 'DELETE' });
+            if (res.status === 401) { window.location.href = 'login_admin.html'; return; }
+            if (!res.ok) {
+                const detalle = res.status === 404
+                    ? 'La ruta de eliminación no existe en el servidor.'
+                    : 'El servidor respondió con el código ' + res.status + '.';
+                throw new Error(detalle);
+            }
+
+            cargar_resumen_semanal();
+            cargar_grafica_mes();
+        } catch (e) {
+            console.error(e);
+            await mostrar_dialogo({
+                tipo: 'error',
+                titulo: 'No se pudo eliminar',
+                texto: 'No se pudieron eliminar los registros del ' + dia + '.\n' + e.message
+            });
+        }
+    }
+
+    // ===== Módulo: gráfica del mes =====
+    let grafica_mes_instancia = null;
+
+    async function cargar_grafica_mes() {
+    const etiquetas = ['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'];
+    let pedidos = [0, 0, 0, 0];
+
+    try {
+        const res = await fetch('/api/metricas/mes-actual');
+        if (res.ok) {
+            const data = await res.json();
+            pedidos = etiquetas.map(et => {
+                const encontrado = data.find(d => d.semana === et);
+                return encontrado ? Number(encontrado.pedidos) : 0;
+            });
+        }
+    } catch (e) {
+        console.error('Error al cargar gráfica:', e);
+    }
+
+    const lienzo = document.getElementById('grafica_mes_actual');
+    if (!lienzo) return;
+    if (grafica_mes_instancia) grafica_mes_instancia.destroy();
+
+    grafica_mes_instancia = new Chart(lienzo.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: etiquetas,
+            datasets: [{
+                label: 'Pedidos',
+                data: pedidos,
+                backgroundColor: ['#0d4f9a', '#1a7fc4', '#4cc9e8', '#8fe0f2'],
+                borderRadius: 12,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+}
+
+    // ===== Módulo: repartidores =====
+    async function cargar_tabla_repartidores() {
+        try {
+            const res = await fetch('/api/admin/repartidores');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            lista_repartidores_cache = await res.json();
+            const cuerpo = document.getElementById('tabla_repartidores');
+            if (!cuerpo) return;
+            cuerpo.innerHTML = '';
+
+            if (lista_repartidores_cache.length === 0) {
+                cuerpo.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--muted);">No hay repartidores registrados.</td></tr>';
+                return;
+            }
+
+            lista_repartidores_cache.forEach(rep => {
+                const id = Number(rep.id);
+                cuerpo.innerHTML +=
+                    '<tr>' +
+                    '<td><b>' + escapar_html_util(rep.nombre) + '</b></td>' +
+                    '<td>' + escapar_html_util(rep.telefono) + '</td>' +
+                    '<td><button class="btn-mini btn-editar" onclick="probar_repartidores(' + id + ')">Probar</button></td>' +
+                    '<td><div class="acciones">' +
+                    '<button class="btn-mini btn-editar" onclick="abrir_modal_editar_repartidores(' + id + ')">Editar</button>' +
+                    '<button class="btn-mini btn-eliminar" onclick="eliminar_repartidores(' + id + ')">Eliminar</button>' +
+                    '</div></td>' +
+                    '</tr>';
+            });
+        } catch (e) {
+            console.error('Error al cargar repartidores:', e);
+        }
+    }
+
+    function abrir_modal_agregar_repartidores() {
+        document.getElementById('id_repartidores').value = '';
+        document.getElementById('nombre_repartidores').value = '';
+        document.getElementById('telefono_repartidores').value = '';
+        document.getElementById('titulo_repartidores').innerText = 'Agregar Repartidor';
+        document.getElementById('modal_repartidores').classList.add('activo');
+    }
+
+    function abrir_modal_editar_repartidores(id) {
+        const rep = lista_repartidores_cache.find(r => Number(r.id) === Number(id));
+        if (!rep) return;
+        document.getElementById('id_repartidores').value = rep.id;
+        document.getElementById('nombre_repartidores').value = rep.nombre;
+        document.getElementById('telefono_repartidores').value = rep.telefono;
+        document.getElementById('titulo_repartidores').innerText = 'Editar Repartidor';
+        document.getElementById('modal_repartidores').classList.add('activo');
+    }
+
+    function cerrar_modal_repartidores() {
+        document.getElementById('modal_repartidores').classList.remove('activo');
+    }
+
+    async function guardar_repartidores(evento) {
+        evento.preventDefault();
+        const id = document.getElementById('id_repartidores').value;
+        const datos = {
+            nombre: document.getElementById('nombre_repartidores').value.trim(),
+            telefono: document.getElementById('telefono_repartidores').value.trim()
+        };
+        const url = id ? '/api/admin/repartidores/' + id : '/api/admin/repartidores';
+        const metodo = id ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: metodo,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            cerrar_modal_repartidores();
+            cargar_tabla_repartidores();
+        } catch (err) {
+            console.error(err);
+            await mostrar_dialogo({ tipo: 'error', titulo: 'No se pudo guardar', texto: 'Revisa los datos e intenta de nuevo.' });
+        }
+    }
+
+    async function eliminar_repartidores(id) {
+        const confirmado = await mostrar_dialogo({
+            tipo: 'peligro',
+            titulo: '¿Eliminar repartidor?',
+            texto: 'El repartidor se borrará permanentemente.',
+            aceptar: 'Eliminar',
+            cancelar: 'Cancelar'
+        });
+        if (!confirmado) return;
+
+        try {
+            const res = await fetch('/api/admin/repartidores/' + id, { method: 'DELETE' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            cargar_tabla_repartidores();
+        } catch (e) {
+            console.error(e);
+            await mostrar_dialogo({ tipo: 'error', titulo: 'No se pudo eliminar', texto: e.message });
+        }
+    }
+
+    async function probar_repartidores(id) {
+        const confirmado = await mostrar_dialogo({
+            tipo: 'aviso',
+            titulo: 'Prueba de Repartidor',
+            texto: 'Se enviará un mensaje de prueba al repartidor. Si responde con cualquier señal (un punto, número), se confirmará.',
+            aceptar: 'Enviar Prueba'
+        });
+        if (!confirmado) return;
+
+        try {
+            const res = await fetch('/api/admin/repartidores/probar/' + id, { method: 'POST' });
+            const data = await res.json();
+            await mostrar_dialogo({
+                tipo: data.exito ? 'aviso' : 'error',
+                titulo: data.exito ? 'Prueba Exitosa' : 'Prueba Fallida',
+                texto: data.mensaje
+            });
+        } catch (e) {
+            await mostrar_dialogo({ tipo: 'error', titulo: 'Error', texto: 'No se pudo completar la prueba de comunicación.' });
+        }
+    }
+
+    // ===== Módulo: configuración de horario =====
+    async function guardar_config_horario() {
+        const datos = {
+            horaApertura: document.getElementById('hora_apertura_config').value,
+            horaCierre: document.getElementById('hora_cierre_config').value,
+            mensajeFueraHorario: document.getElementById('mensaje_fuera_horario_config').value.trim()
+        };
+
+        try {
+            const res = await fetch('/api/admin/config-bot', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datos)
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                await mostrar_dialogo({ tipo: 'error', titulo: 'No se pudo guardar', texto: data.error || 'Revisa los datos.' });
+                return;
+            }
+            await mostrar_dialogo({ tipo: 'aviso', titulo: 'Configuración guardada', texto: 'El horario del bot se actualizó correctamente.' });
+        } catch (e) {
+            console.error(e);
+            await mostrar_dialogo({ tipo: 'error', titulo: 'Error de conexión', texto: 'No se pudo conectar con el servidor.' });
+        }
+    }
+
+    async function cargar_config_horario() {
+        try {
+            const res = await fetch('/api/admin/config-bot');
+            if (!res.ok) return;
+            const c = await res.json();
+            if (!c) return;
+            document.getElementById('hora_apertura_config').value = c.hora_apertura.slice(0, 5);
+            document.getElementById('hora_cierre_config').value = c.hora_cierre.slice(0, 5);
+            document.getElementById('mensaje_fuera_horario_config').value = c.mensaje_fuera_horario;
+        } catch (e) {
+            console.error('Error al cargar horario:', e);
+        }
+    }
+
+    // ===== Módulo: pedidos pendientes =====
+    async function actualizar_badge_pendientes() {
+        try {
+            const res = await fetch('/api/admin/pedidos/pendientes');
+            if (!res.ok) return;
+            const pedidos = await res.json();
+            const badge = document.getElementById('badge_pendientes');
+            if (badge) {
+                badge.innerText = pedidos.length;
+                badge.style.background = pedidos.length > 0 ? 'var(--danger)' : 'var(--muted)';
+            }
+        } catch (e) {
+            console.error('Error al contar pendientes:', e);
+        }
+    }
+
+    async function abrir_modal_pendientes() {
+        document.getElementById('modal_pendientes').classList.add('activo');
+        await cargar_lista_pendientes();
+    }
+
+    function cerrar_modal_pendientes() {
+        document.getElementById('modal_pendientes').classList.remove('activo');
+    }
+
+    async function cargar_lista_pendientes() {
+        const contenedor = document.getElementById('lista_pendientes');
+        if (!contenedor) return;
+        contenedor.innerHTML = '<p style="text-align:center; color:var(--muted);">Cargando...</p>';
+        try {
+            const res = await fetch('/api/admin/pedidos/pendientes');
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const pedidos = await res.json();
+
+            if (pedidos.length === 0) {
+                contenedor.innerHTML = '<p style="text-align:center; color:var(--muted);">No hay pedidos pendientes.</p>';
+                return;
+            }
+
+            contenedor.innerHTML = pedidos.map(p =>
+                '<div style="background:#fff; border-radius:16px; padding:14px 16px; margin-bottom:12px; text-align:left; box-shadow:0 2px 8px rgba(8,70,130,0.08);">' +
+                '<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">' +
+                '<b>' + escapar_html_util(p.tipo_hielo) + '</b>' +
+                '<span style="color:' + (p.estado === 'Nuevo' ? 'var(--danger)' : 'var(--blue)') + '; font-weight:800;">' + escapar_html_util(p.estado) + '</span>' +
+                '</div>' +
+                '<div style="font-size:13px; color:var(--text); line-height:1.6;">' +
+                '📦 ' + escapar_html_util(p.cantidad) + ' pzs · 💵 ' + escapar_html_util(p.metodo_pago) + ' ($' + Number(p.monto_total).toFixed(2) + ')<br>' +
+                '📍 ' + escapar_html_util(p.direccion) + (p.referencia ? ' (' + escapar_html_util(p.referencia) + ')' : '') + '<br>' +
+                '📞 ' + escapar_html_util(p.telefono) + ' · 🕒 ' + escapar_html_util(p.fecha_hora) +
+                '</div>' +
+                '<button class="btn-mini btn-editar" style="margin-top:10px;" onclick="marcar_atendido_pendientes(' + Number(p.id) + ')">Marcar atendido</button>' +
+                '</div>'
+            ).join('');
+        } catch (e) {
+            console.error(e);
+            contenedor.innerHTML = '<p style="text-align:center; color:var(--danger);">No se pudieron cargar los pedidos.</p>';
+        }
+    }
+
+    async function marcar_atendido_pendientes(id) {
+        try {
+            const res = await fetch('/api/admin/pedidos/' + id + '/atender', { method: 'PUT' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            await cargar_lista_pendientes();
+            actualizar_badge_pendientes();
+        } catch (e) {
+            console.error(e);
+            await mostrar_dialogo({ tipo: 'error', titulo: 'No se pudo actualizar', texto: 'Intenta de nuevo.' });
+        }
+    }
+
+    // ===== Eventos de formularios y cierre al hacer clic fuera =====
+    document.getElementById('form_editar_semanal').addEventListener('submit', guardar_resumen_semanal);
+    document.getElementById('form_repartidores').addEventListener('submit', guardar_repartidores);
+
+    document.getElementById('modal_editar_semanal').addEventListener('click', (e) => {
+        if (e.target.id === 'modal_editar_semanal') cerrar_modal_editar_semanal();
+    });
+    document.getElementById('modal_repartidores').addEventListener('click', (e) => {
+        if (e.target.id === 'modal_repartidores') cerrar_modal_repartidores();
+    });
+    document.getElementById('modal_pendientes').addEventListener('click', (e) => {
+        if (e.target.id === 'modal_pendientes') cerrar_modal_pendientes();
+    });
+
+    
+
+    // ===== Inicialización =====
+    window.addEventListener('load', () => {
+        verificar_estado_inicial_bot();
+        cargar_resumen_semanal();
+        cargar_grafica_mes();
+        cargar_tabla_repartidores();
+        cargar_config_horario();
+        actualizar_badge_pendientes();
+
+        setInterval(verificar_estado_conexion_bot, 5000);
+        setInterval(actualizar_badge_pendientes, 30000);
+    });
+</script>
+</body>
+</html>

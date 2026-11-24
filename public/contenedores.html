@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Contenedores</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Botón de Regreso Flotante Minimalista */
+        .btn-regresar {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: var(--dark);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .btn-regresar:hover {
+            background: #ffffff;
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        /* Círculos decorativos de fondo */
+        .circle-1, .circle-2 {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            z-index: 1;
+            pointer-events: none;
+        }
+        .circle-1 {
+            width: 450px;
+            height: 450px;
+            top: -150px;
+            left: -100px;
+        }
+        .circle-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            right: -50px;
+        }
+
+        /* Tarjeta principal con efecto Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px;
+            padding: 30px 40px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 119, 182, 0.2);
+            z-index: 10;
+            width: 100%;
+            max-width: 620px;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+
+        .logo-container {
+            margin-bottom: 15px;
+        }
+
+        .logo-img {
+            max-width: 200px;
+            height: auto;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+        }
+
+        .titulo-banner {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        /* Contenedor con barra de desplazamiento para la cuadrícula */
+        .contenedor-scroll {
+            width: 100%;
+            overflow-y: auto;
+            max-height: 420px;
+            padding-right: 8px;
+            box-sizing: border-box;
+        }
+
+        /* Cuadrícula de 3 columnas exactas */
+        .grid-contenedores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        /* Diseño de los botones de cada contenedor */
+        .btn-contenedor {
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--dark);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 12px 0;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 119, 182, 0.08);
+            transition: all 0.2s ease;
+        }
+
+        .btn-contenedor:hover {
+            background: var(--primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 119, 182, 0.3);
+        }
+
+        .btn-contenedor:active {
+            transform: translateY(1px);
+        }
+
+        /* Barra de desplazamiento estética */
+        .contenedor-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .contenedor-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        .contenedor-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0, 119, 182, 0.3);
+            border-radius: 10px;
+        }
+        .contenedor-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 119, 182, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Botón de regreso minimalista flotante -->
+    <a href="menu-empleado.html" class="btn-regresar">←</a>
+
+    <div class="circle-1"></div>
+    <div class="circle-2"></div>
+
+    <div class="glass-card">
+        <div class="logo-container">
+            <img src="IMG_1420.PNG" alt="Hielo DIBEN" class="logo-img">
+        </div>
+        
+        <h1 class="titulo-banner">Contenedores</h1>
+
+        <div class="contenedor-scroll">
+            <!-- Aquí adentro JavaScript inyecta automáticamente los 57 botones -->
+            <div class="grid-contenedores" id="grid-botones"></div>
+        </div>
+    </div>
+
+    <script>
+        // Lógica intacta para crear los 57 botones automáticamente
+        const grid = document.getElementById('grid-botones');
+        const letras = ['A', 'B', 'C'];
+        
+        // Un ciclo del 1 al 19
+        for (let numero = 1; numero <= 19; numero++) {
+            // Por cada número, creamos un botón para A, uno para B y uno para C
+            letras.forEach(letra => {
+                const nombreContenedor = numero + letra; // Ejemplo: "1A", "5B", etc.
+                
+                const boton = document.createElement('button');
+                boton.className = 'btn-contenedor';
+                boton.textContent = nombreContenedor;
+                
+                // Acción al hacer clic en un contenedor (idéntica a tu código original)
+                boton.onclick = function() {
+                    // Nos lleva al formulario y manda el nombre del contenedor en la URL
+                    window.location.href = `registro-produccion.html?contenedor=${nombreContenedor}`;
+                };
+                
+                grid.appendChild(boton);
+            });
+        }
+    </script>
+</body>
+</html>

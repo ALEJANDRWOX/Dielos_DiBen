@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Consulta de Registros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+            --border-color: #dee2e6;
+            --danger: #d62839;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #2b2d42;
+        }
+
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 30px; box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); z-index: 1000;
+        }
+
+        .logo-img { height: 70px; width: auto; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+
+        .btn-regresar {
+            background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);
+            color: var(--dark); padding: 8px 16px; border-radius: 50px;
+            text-decoration: none; font-size: 14px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5); transition: all 0.3s ease;
+        }
+
+        .btn-regresar:hover { background: #ffffff; color: var(--primary); transform: scale(1.05); }
+
+        .container { max-width: 1200px; margin: 90px auto 0 auto; }
+
+        h1 {
+            text-align: center; color: var(--dark); margin-bottom: 25px;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px);
+            padding: 25px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 119, 182, 0.15);
+            margin-bottom: 30px; border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .filtros-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) 150px;
+            gap: 15px;
+            align-items: flex-end;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 14px; font-weight: 700; color: var(--dark); }
+        select {
+            padding: 12px 15px; font-size: 14px; font-family: 'Montserrat', sans-serif;
+            background: #ffffff; border: 1px solid var(--border-color);
+            border-radius: 12px; outline: none; color: #333; width: 100%;
+        }
+        select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15); }
+
+        .btn-buscar {
+            background-color: var(--primary); color: white; border: none;
+            padding: 12px 20px; border-radius: 12px; cursor: pointer;
+            font-weight: 700; text-transform: uppercase; font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3); transition: all 0.3s ease;
+            height: 47px;
+        }
+        .btn-buscar:hover { background-color: var(--dark); transform: translateY(-2px); }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
+
+        table {
+            width: 100%; border-collapse: collapse; background: white;
+            border-radius: 10px; overflow: hidden;
+        }
+
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 14px; }
+        th { background-color: var(--primary); color: white; font-weight: 600; }
+        tr:hover { background-color: #f1f3f5; }
+        .mensaje-vacio { text-align: center; color: #666; padding: 25px; font-weight: 600; }
+
+        .acciones-container { display: flex; gap: 6px; }
+
+        .btn-editar {
+            background-color: #ffb703; color: #000; border: none;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; transition: background-color 0.2s;
+        }
+        .btn-editar:hover { background-color: #fb8500; color: white; }
+
+        .btn-eliminar {
+            background-color: var(--danger); color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            font-weight: bold; transition: background-color 0.2s;
+        }
+        .btn-eliminar:hover { background-color: #a81c2b; }
+
+        /* ==========================================
+           MODALES (EDICIÓN Y ELIMINACIÓN)
+           ========================================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 35px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 20px 40px rgba(0, 119, 182, 0.3);
+            text-align: center;
+            position: relative;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-logo {
+            max-width: 120px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+
+        .modal-icon-warning {
+            font-size: 48px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        .modal-card h3 {
+            color: var(--dark);
+            font-size: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+        }
+
+        .modal-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .modal-form label {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .modal-form input, .modal-form select {
+            padding: 10px 14px;
+            font-size: 14px;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 119, 182, 0.3);
+            border-radius: 12px;
+            outline: none;
+            color: #333;
+            width: 100%;
+        }
+
+        .modal-form input:focus, .modal-form select:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-guardar-modal, .btn-eliminar-modal {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-guardar-modal {
+            background: var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+        }
+        .btn-guardar-modal:hover { background: var(--dark); transform: translateY(-2px); }
+
+        .btn-eliminar-modal {
+            background: var(--danger);
+            box-shadow: 0 4px 12px rgba(214, 40, 57, 0.3);
+        }
+        .btn-eliminar-modal:hover { background: #a81c2b; transform: translateY(-2px); }
+
+        .btn-cancelar-modal {
+            flex: 1;
+            padding: 12px;
+            background: #ffffff;
+            border: 2px solid #dee2e6;
+            color: #333;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-cancelar-modal:hover { background: #f8f9fa; border-color: #adb5bd; transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="logo-img">
+        <a href="admin-dashboard.html" class="btn-regresar">← Volver al Panel</a>
+    </div>
+
+    <div class="container">
+        <h1>🔍 Consulta de Registros Históricos</h1>
+
+        <!-- Filtros -->
+        <div class="card">
+            <div class="filtros-container">
+                <div class="form-group">
+                    <label for="selectArchivo">Seleccione el Archivo:</label>
+                    <select id="selectArchivo">
+                        <option value="choferes">Choferes</option>
+                        <option value="produccion">Contenedores (Producción)</option>
+                        <option value="ventas">Ventas</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectAnio">Seleccione el Año:</label>
+                    <select id="selectAnio">
+                        <option value="todos">Todos los años</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                        <option value="2028">2028</option>
+                        <option value="2029">2029</option>
+                        <option value="2030">2030</option>
+                        <option value="2031">2031</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectMes">Seleccione el Mes:</label>
+                    <select id="selectMes">
+                        <option value="todos">Todos los meses</option>
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+
+                <button class="btn-buscar" onclick="buscarRegistros()">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="card">
+            <h2 id="tituloResultados" style="color: var(--primary); margin-bottom: 15px; font-size: 18px;">Resultados de la Búsqueda</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody">
+                        <tr><td colspan="8" class="mensaje-vacio">Utiliza los filtros de arriba y presiona "Buscar" para ver los registros.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN DE ELIMINACIÓN -->
+    <div id="modalConfirmacion" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-icon-warning">⚠️</div>
+            <h3>¿Estás seguro?</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 25px; line-height: 1.5; font-weight: 500;">
+                Esta acción no se puede deshacer.<br>El registro se borrará permanentemente de la base de datos.
+            </p>
+            <div class="modal-botones">
+                <button type="button" class="btn-cancelar-modal" onclick="cerrarModal('modalConfirmacion')">Cancelar</button>
+                <button type="button" class="btn-eliminar-modal" onclick="ejecutarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Venta -->
+    <div id="modalVenta" class="modal-overlay">
+        <div class="modal-card">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3>Editar Venta</h3>
+            <form id="formEditarVenta" class="modal-form">
+                <input type="hidden" id="ventaId">
+                <div class="form-group">
+                    <label>Fecha (YYYY-MM-DD):</label>
+                    <input type="date" id="ventaFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Estado:</label>
+                    <input type="text" id="ventaEstado" required>
+                </div>
+                <div class="form-group">
+                    <label>Presentación:</label>
+                    <input type="text" id="ventaPresentacion" required>
+                </div>
+                <div class="form-group">
+                    <label>Tipo:</label>
+                    <input type="text" id="ventaTipo" required>
+                </div>
+                <div class="form-group">
+                    <label>Medida:</label>
+                    <input type="text" id="ventaMedida" required>
+                </div>
+                <div class="form-group">
+                    <label>Monto ($):</label>
+                    <input type="number" step="0.01" id="ventaMonto" required>
+                </div>
+                <div class="modal-botones">
+                    <button type="button" class="btn-cancelar-modal" onclick="cerrarModal('modalVenta')">Cancelar</button>
+                    <button type="submit" class="btn-guardar-modal">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Producción -->
+    <div id="modalProduccion" class="modal-overlay">
+        <div class="modal-card">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3>Editar Producción / Mermas</h3>
+            <form id="formEditarProduccion" class="modal-form">
+                <input type="hidden" id="prodId">
+                <div class="form-group">
+                    <label>Fecha (YYYY-MM-DD):</label>
+                    <input type="date" id="prodFecha" required>
+                </div>
+                <div class="form-group">
+                    <label>Hora:</label>
+                    <input type="time" id="prodHora" required>
+                </div>
+                <div class="form-group">
+                    <label>Hielos Extraídos:</label>
+                    <input type="number" id="prodHielos" required>
+                </div>
+                <div class="form-group">
+                    <label>Mermas:</label>
+                    <input type="number" id="prodMermas" required>
+                </div>
+                <div class="modal-botones">
+                    <button type="button" class="btn-cancelar-modal" onclick="cerrarModal('modalProduccion')">Cancelar</button>
+                    <button type="submit" class="btn-guardar-modal">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Editar Chofer -->
+    <div id="modalChofer" class="modal-overlay">
+        <div class="modal-card">
+            <img src="IMG_logo_Recur.ico" alt="Hielo DIBEN" class="modal-logo">
+            <h3>Editar Reporte de Chofer</h3>
+            <form id="formEditarChofer" class="modal-form">
+                <input type="hidden" id="choferId">
+                <div class="form-group">
+                    <label>Transportista:</label>
+                    <input type="text" id="choferTransportista" required>
+                </div>
+                <div class="form-group">
+                    <label>Camión:</label>
+                    <select id="choferCamion" required>
+                        <option value="camion 01">camion 01</option>
+                        <option value="camion 02">camion 02</option>
+                        <option value="camion 04">camion 04</option>
+                        <option value="camion 16">camion 16</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Cant. Mermas:</label>
+                    <input type="number" id="choferCantidad" required>
+                </div>
+                <div class="modal-botones">
+                    <button type="button" class="btn-cancelar-modal" onclick="cerrarModal('modalChofer')">Cancelar</button>
+                    <button type="submit" class="btn-guardar-modal">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // ==========================================
+        // FUNCIONES DE EDICIÓN
+        // ==========================================
+        const soloFecha = (f) => String(f).slice(0, 10);
+
+        function abrirEditarVenta(id, fecha, estado, presentacion, tipo, medida, monto) {
+            document.getElementById('ventaId').value = id;
+            document.getElementById('ventaFecha').value = soloFecha(fecha);
+            document.getElementById('ventaEstado').value = estado;
+            document.getElementById('ventaPresentacion').value = presentacion;
+            document.getElementById('ventaTipo').value = tipo;
+            document.getElementById('ventaMedida').value = medida;
+            document.getElementById('ventaMonto').value = monto;
+            document.getElementById('modalVenta').style.display = 'flex';
+        }
+
+        function abrirEditarProduccion(id, fecha, hora, hielosExtraidos, mermas) {
+            document.getElementById('prodId').value = id;
+            document.getElementById('prodFecha').value = soloFecha(fecha);
+            document.getElementById('prodHora').value = String(hora).slice(0, 5);
+            document.getElementById('prodHielos').value = hielosExtraidos;
+            document.getElementById('prodMermas').value = mermas;
+            document.getElementById('modalProduccion').style.display = 'flex';
+        }
+
+        function abrirEditarChofer(id, transportista, camion, cantidad) {
+            document.getElementById('choferId').value = id;
+            document.getElementById('choferTransportista').value = transportista;
+            document.getElementById('choferCamion').value = camion || 'camion 01';
+            document.getElementById('choferCantidad').value = cantidad;
+            document.getElementById('modalChofer').style.display = 'flex';
+        }
+
+        // ==========================================
+        // FUNCIONES DE ELIMINACIÓN CON MODAL
+        // ==========================================
+        let itemAEliminar = null;
+
+        function mostrarModalEliminar(tipo, id) {
+            itemAEliminar = { tipo, id };
+            document.getElementById('modalConfirmacion').style.display = 'flex';
+        }
+
+        async function ejecutarEliminacion() {
+            if (!itemAEliminar) return;
+            const { tipo, id } = itemAEliminar;
+            let url = '';
+            
+            if (tipo === 'venta') url = `/api/admin/ventas/${id}`;
+            else if (tipo === 'produccion') url = `/api/admin/produccion/${id}`;
+            else if (tipo === 'chofer') url = `/api/admin/choferes/${id}`;
+
+            try {
+                const res = await fetch(url, { method: 'DELETE' });
+                if (res.ok) {
+                    cerrarModal('modalConfirmacion');
+                    buscarRegistros(); // Recarga la tabla de búsqueda
+                } else {
+                    alert('Error al eliminar el registro.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('No se pudo conectar con el servidor.');
+            }
+        }
+
+        // ==========================================
+        // FUNCIÓN DE BÚSQUEDA HISTÓRICA
+        // ==========================================
+        async function buscarRegistros() {
+            const archivo = document.getElementById('selectArchivo').value;
+            const anio = document.getElementById('selectAnio').value;
+            const mes = document.getElementById('selectMes').value;
+
+            try {
+                const res = await fetch(`/api/admin/filtrar?tipo=${archivo}&anio=${anio}&mes=${mes}`);
+                const datos = await res.json();
+                
+                const thead = document.getElementById('tableHead');
+                const tbody = document.getElementById('tableBody');
+                thead.innerHTML = '';
+                tbody.innerHTML = '';
+
+                if (datos.length === 0) {
+                    thead.innerHTML = `<tr><th>Información</th></tr>`;
+                    tbody.innerHTML = `<tr><td class="mensaje-vacio">No se encontraron registros con los filtros seleccionados.</td></tr>`;
+                    return;
+                }
+
+                if (archivo === 'ventas') {
+                    thead.innerHTML = `<tr><th>ID</th><th>Empleado</th><th>Fecha</th><th>Estado</th><th>Presentación</th><th>Tipo</th><th>Medida</th><th>Monto ($)</th><th>Acciones</th></tr>`;
+                    datos.forEach(v => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${v.id}</td>
+                                <td>${v.empleado_nombre || 'N/A'} (${v.empleado_num || ''})</td>
+                                <td>${soloFecha(v.fecha)}</td>
+                                <td>${v.estado}</td>
+                                <td>${v.presentacion}</td>
+                                <td>${v.tipo}</td>
+                                <td>${v.medida_kg || v.medida}</td>
+                                <td>$${v.monto}</td>
+                                <td>
+                                    <div class="acciones-container">
+                                        <button class="btn-editar" onclick="abrirEditarVenta(${v.id}, '${soloFecha(v.fecha)}', '${v.estado}', '${v.presentacion}', '${v.tipo}', '${v.medida_kg || v.medida}', ${v.monto})">Editar</button>
+                                        <button class="btn-eliminar" onclick="mostrarModalEliminar('venta', ${v.id})">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    });
+                } else if (archivo === 'produccion') {
+                    thead.innerHTML = `<tr><th>ID</th><th>Empleado</th><th>Contenedor</th><th>Fecha</th><th>Hora</th><th>Hielos Extraídos</th><th>Mermas</th><th>Acciones</th></tr>`;
+                    datos.forEach(p => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${p.id}</td>
+                                <td>${p.empleado_nombre || 'N/A'} (${p.empleado_num || ''})</td>
+                                <td>${p.contenedor}</td>
+                                <td>${soloFecha(p.fecha)}</td>
+                                <td>${String(p.hora).slice(0, 5)}</td>
+                                <td>${p.hielos_extraidos !== undefined ? p.hielos_extraidos : 0}</td>
+                                <td>${p.mermas}</td>
+                                <td>
+                                    <div class="acciones-container">
+                                        <button class="btn-editar" onclick="abrirEditarProduccion(${p.id}, '${soloFecha(p.fecha)}', '${String(p.hora).slice(0, 5)}', ${p.hielos_extraidos !== undefined ? p.hielos_extraidos : 0}, ${p.mermas})">Editar</button>
+                                        <button class="btn-eliminar" onclick="mostrarModalEliminar('produccion', ${p.id})">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    });
+                } else if (archivo === 'choferes') {
+                    thead.innerHTML = `<tr><th>ID</th><th>Transportista</th><th>Camión</th><th>Cant. Mermas</th><th>Fecha</th><th>Detalles / Causas</th><th>Acciones</th></tr>`;
+                    datos.forEach(c => {
+                        let detallesHTML = '<ul style="margin-left: 15px; font-size: 13px;">';
+                        if (c.detalles && c.detalles.length > 0) {
+                            c.detalles.forEach(d => {
+                                detallesHTML += `<li><b>#${d.numero_merma}:</b> ${d.causa} ${d.explicacion ? '('+d.explicacion+')' : ''}</li>`;
+                            });
+                        } else {
+                            detallesHTML += '<li>Sin mermas</li>';
+                        }
+                        detallesHTML += '</ul>';
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${c.id}</td>
+                                <td><b>${c.transportista}</b></td>
+                                <td>${c.camion || 'Sin asignar'}</td>
+                                <td>${c.cantidad_mermas}</td>
+                                <td>${soloFecha(c.fecha)}</td>
+                                <td>${detallesHTML}</td>
+                                <td>
+                                    <div class="acciones-container">
+                                        <button class="btn-editar" onclick="abrirEditarChofer(${c.id}, '${c.transportista}', '${c.camion || 'camion 01'}', ${c.cantidad_mermas})">Editar</button>
+                                        <button class="btn-eliminar" onclick="mostrarModalEliminar('chofer', ${c.id})">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Error al filtrar registros:", err);
+                alert("Error al realizar la búsqueda.");
+            }
+        }
+
+        // ==========================================
+        // SUBMITS DE EDICIÓN HISTÓRICA
+        // ==========================================
+        document.getElementById('formEditarVenta').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('ventaId').value;
+            const fecha = document.getElementById('ventaFecha').value;
+            const estado = document.getElementById('ventaEstado').value;
+            const presentacion = document.getElementById('ventaPresentacion').value;
+            const tipo = document.getElementById('ventaTipo').value;
+            const medida = document.getElementById('ventaMedida').value;
+            const monto = parseFloat(document.getElementById('ventaMonto').value);
+
+            const res = await fetch(`/api/admin/ventas/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fecha, estado, presentacion, tipo, medida, monto })
+            });
+            if (res.ok) {
+                cerrarModal('modalVenta');
+                buscarRegistros();
+            } else {
+                alert('Error al actualizar venta');
+            }
+        });
+
+        document.getElementById('formEditarProduccion').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('prodId').value;
+            const fecha = document.getElementById('prodFecha').value;
+            const hora = document.getElementById('prodHora').value;
+            const hielosExtraidos = parseInt(document.getElementById('prodHielos').value) || 0;
+            const mermas = parseInt(document.getElementById('prodMermas').value) || 0;
+
+            const res = await fetch(`/api/admin/produccion/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fecha, hora, hielosExtraidos, mermas })
+            });
+            if (res.ok) {
+                cerrarModal('modalProduccion');
+                buscarRegistros();
+            } else {
+                alert('Error al actualizar producción');
+            }
+        });
+
+        document.getElementById('formEditarChofer').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('choferId').value;
+            const transportista = document.getElementById('choferTransportista').value;
+            const camion = document.getElementById('choferCamion').value;
+            const cantidadMermas = parseInt(document.getElementById('choferCantidad').value) || 0;
+
+            const res = await fetch(`/api/admin/choferes/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transportista, camion, cantidadMermas })
+            });
+            if (res.ok) {
+                cerrarModal('modalChofer');
+                buscarRegistros();
+            } else {
+                alert('Error al actualizar reporte de chofer');
+            }
+        });
+    </script>
+</body>
+</html>

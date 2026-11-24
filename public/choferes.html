@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hielo DIBEN - Registro de Choferes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0077b6;
+            --secondary: #00b4d8;
+            --dark: #023e8a;
+            --light: #caf0f8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--light) 0%, var(--secondary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 30px 20px;
+        }
+
+        .btn-regresar {
+            position: fixed; top: 25px; left: 25px;
+            background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(10px);
+            color: var(--dark); width: 45px; height: 45px; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            text-decoration: none; font-size: 22px; font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 119, 182, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.5); transition: all 0.3s ease; z-index: 1000;
+        }
+        .btn-regresar:hover { background: #ffffff; color: var(--primary); transform: scale(1.1); }
+
+        .circle-1, .circle-2 {
+            position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.15); z-index: 1; pointer-events: none;
+        }
+        .circle-1 { width: 450px; height: 450px; top: -150px; left: -100px; }
+        .circle-2 { width: 300px; height: 300px; bottom: -50px; right: -50px; }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 24px; padding: 35px 45px; text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 119, 182, 0.2); z-index: 10;
+            width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column;
+        }
+
+        .logo-container { margin-bottom: 15px; }
+        .logo-img { max-width: 200px; height: auto; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12)); }
+
+        h2 {
+            color: var(--dark); font-size: 20px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 15px;
+        }
+
+        .form-scroll-container {
+            overflow-y: auto; max-height: 55vh; padding-right: 10px; text-align: left; margin-bottom: 15px;
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+        label { font-size: 14px; font-weight: 700; color: var(--dark); }
+        input, select, textarea {
+            padding: 12px 15px; font-size: 15px; font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 12px; outline: none; color: #333; width: 100%; box-sizing: border-box;
+        }
+        input:focus, select:focus, textarea:focus {
+            background: #ffffff; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.15);
+        }
+
+        .merma-card {
+            background: rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 16px; padding: 15px; margin-bottom: 15px;
+        }
+        .merma-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 10px; text-transform: uppercase; }
+
+        button.btn-guardar {
+            width: 100%; padding: 14px; background: var(--primary); border: none; color: white;
+            font-size: 16px; font-weight: 700; font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase; letter-spacing: 1px; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 119, 182, 0.3); transition: all 0.3s ease;
+        }
+        button.btn-guardar:hover {
+            background: #ffffff; color: var(--primary); box-shadow: 0 8px 22px rgba(0, 119, 182, 0.4); transform: translateY(-2px);
+        }
+
+        /* Estilos para los Modales Estéticos (Glassmorphism) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 24px;
+            padding: 35px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 119, 182, 0.3);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-icon-exito {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+        }
+
+        .modal-card h3 {
+            color: var(--dark);
+            font-size: 20px;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .modal-card p {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-modal-primario {
+            flex: 1;
+            padding: 12px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 119, 182, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal-primario:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-modal-secundario {
+            flex: 1;
+            padding: 12px;
+            background: #e63946;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-modal-secundario:hover {
+            background: #d90429;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="roles.html" class="btn-regresar" id="btnRegresar">←</a>
+    <div class="circle-1"></div>
+    <div class="circle-2"></div>
+
+    <div class="glass-card">
+        <div class="logo-container">
+            <img src="IMG_1420.PNG" alt="Hielo DIBEN" class="logo-img">
+        </div>
+
+        <h2>Registro de Choferes / Mermas</h2>
+
+        <form id="formChoferes">
+            <div class="form-scroll-container">
+                <div class="form-group">
+                    <label for="transportista">Nombre del Transportista:</label>
+                    <input type="text" id="transportista" placeholder="Escriba el nombre completo" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="camion">Seleccione el Camión:</label>
+                    <select id="camion" required>
+                        <option value="">Seleccione un camión</option>
+                        <option value="camion 01">camion 01</option>
+                        <option value="camion 02">camion 02</option>
+                        <option value="camion 04">camion 04</option>
+                        <option value="camion 16">camion 16</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="cantidadMermas">Cantidad de Mermas (Daños):</label>
+                    <select id="cantidadMermas" required onchange="generarCamposMermas()">
+                        <option value="">Seleccione cantidad</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                    </select>
+                </div>
+
+                <div id="contenedorMermas"></div>
+            </div>
+
+            <button type="submit" class="btn-guardar">Guardar Reporte</button>
+        </form>
+    </div>
+
+    <!-- Modal de Éxito Personalizado -->
+    <div id="modalExito" class="modal-overlay">
+        <div class="modal-card">
+            <img src="IMG_guardar_Recu.png" alt="Guardado con éxito" class="modal-icon-exito">
+            <h3>¡Guardado Exitosamente!</h3>
+            <p id="modalMensajeTexto">El reporte de chofer se ha guardado correctamente en la base de datos.</p>
+            <button type="button" class="btn-modal-primario" onclick="cerrarModalExito()">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación de Salida Personalizado -->
+    <div id="modalConfirmar" class="modal-overlay">
+        <div class="modal-card">
+            <h3>¿Estás seguro?</h3>
+            <p id="textoConfirmar">¿Estás seguro que quieres dejar el formulario sin terminar? Por lo consecuente no se guardarán los datos.</p>
+            <div class="modal-botones">
+                <button type="button" class="btn-modal-secundario" onclick="ejecutarConfirmar(false)">Cancelar</button>
+                <button type="button" class="btn-modal-primario" onclick="ejecutarConfirmar(true)">Sí, salir</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Detección de cambios en el formulario
+        let formularioModificado = false;
+
+        document.addEventListener('input', (e) => {
+            if (e.target.matches('input, select, textarea')) {
+                formularioModificado = true;
+            }
+        });
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('input, select, textarea')) {
+                formularioModificado = true;
+            }
+        });
+
+        // Interceptar botón de regreso
+        document.getElementById('btnRegresar').addEventListener('click', function(e) {
+            if (formularioModificado) {
+                e.preventDefault();
+                mostrarConfirmacion(
+                    "¿Estás seguro que quieres dejar el formulario sin terminar? Por lo consecuente no se guardarán los datos.",
+                    function(confirmado) {
+                        if (confirmado) {
+                            window.location.href = 'roles.html';
+                        }
+                    }
+                );
+            }
+        });
+
+        let callbackConfirmacion = null;
+        function mostrarConfirmacion(mensaje, callback) {
+            document.getElementById('textoConfirmar').innerText = mensaje;
+            document.getElementById('modalConfirmar').style.display = 'flex';
+            callbackConfirmacion = callback;
+        }
+
+        function ejecutarConfirmar(resultado) {
+            document.getElementById('modalConfirmar').style.display = 'none';
+            if (callbackConfirmacion) {
+                callbackConfirmacion(resultado);
+                callbackConfirmacion = null;
+            }
+        }
+
+        // Funciones para controlar el modal amigable de éxito
+        function mostrarModalExito(mensaje, callback) {
+            document.getElementById('modalMensajeTexto').innerText = mensaje;
+            document.getElementById('modalExito').style.display = 'flex';
+            window.modalCallback = callback;
+        }
+
+        function cerrarModalExito() {
+            document.getElementById('modalExito').style.display = 'none';
+            if (typeof window.modalCallback === 'function') {
+                window.modalCallback();
+            }
+        }
+
+        function generarCamposMermas() {
+            const cantidad = parseInt(document.getElementById('cantidadMermas').value) || 0;
+            const contenedor = document.getElementById('contenedorMermas');
+            contenedor.innerHTML = '';
+
+            for (let i = 1; i <= cantidad; i++) {
+                const mermaCard = document.createElement('div');
+                mermaCard.className = 'merma-card';
+                mermaCard.innerHTML = `
+                    <div class="merma-title">Merma / Daño #${i}</div>
+                    <div class="form-group">
+                        <label>Causa:</label>
+                        <select name="causa_${i}" required onchange="verificarOtros(this, ${i})">
+                            <option value="">Seleccione la causa</option>
+                            <option value="Mal acomodo de la mercancía">Mal acomodo de la mercancía</option>
+                            <option value="Cambios de temperatura">Cambios de temperatura</option>
+                            <option value="Vibraciones y golpes durante el transporte">Vibraciones y golpes durante el transporte</option>
+                            <option value="Manipulación inadecuada durante la carga y descarga">Manipulación inadecuada durante la carga y descarga</option>
+                            <option value="Temperatura inadecuada dentro de la caja del camión">Temperatura inadecuada dentro de la caja del camión</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="grupo_otros_${i}" style="display: none;">
+                        <label>Explica situación:</label>
+                        <textarea name="explicacion_${i}" rows="2" placeholder="Describa la situación..."></textarea>
+                    </div>
+                `;
+                contenedor.appendChild(mermaCard);
+            }
+            formularioModificado = true;
+        }
+
+        function verificarOtros(selectElement, index) {
+            const grupoOtros = document.getElementById(`grupo_otros_${index}`);
+            if (selectElement.value === 'Otros') {
+                grupoOtros.style.display = 'flex';
+            } else {
+                grupoOtros.style.display = 'none';
+            }
+        }
+
+        document.getElementById('formChoferes').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const transportista = document.getElementById('transportista').value.trim();
+            const camion = document.getElementById('camion').value;
+            const cantidadMermas = parseInt(document.getElementById('cantidadMermas').value) || 0;
+            
+            const mermasDetalle = [];
+            for (let i = 1; i <= cantidadMermas; i++) {
+                const causaSelect = document.querySelector(`[name="causa_${i}"]`);
+                const causa = causaSelect ? causaSelect.value : '';
+                let explicacion = '';
+                if (causa === 'Otros') {
+                    const explicacionInput = document.querySelector(`[name="explicacion_${i}"]`);
+                    explicacion = explicacionInput ? explicacionInput.value.trim() : '';
+                }
+                mermasDetalle.push({ numero: i, causa, explicacion });
+            }
+
+            const datosReporte = {
+                transportista,
+                camion,
+                cantidadMermas,
+                mermasDetalle
+            };
+
+            try {
+                const respuesta = await fetch('/api/choferes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datosReporte)
+                });
+
+                if (respuesta.ok) {
+                    formularioModificado = false; // Desactivar la advertencia al guardar con éxito
+                    mostrarModalExito('¡Reporte de chofer guardado correctamente!', function() {
+                        document.getElementById('formChoferes').reset();
+                        document.getElementById('contenedorMermas').innerHTML = '';
+                    });
+                } else {
+                    const errorTexto = await respuesta.text();
+                    alert('Error al guardar el reporte: ' + errorTexto);
+                }
+            } catch (error) {
+                console.error('Error de red:', error);
+                alert('No se pudo conectar con el servidor.');
+            }
+        });
+    </script>
+</body>
+</html>
